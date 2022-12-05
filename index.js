@@ -29,7 +29,9 @@ var encrypt = (privatekey=null,file, callback)=>{
         });
 
     } else {
-        throw "File not Exists or File not Valid";
+        console.log("File not Exists or File not Valid");
+        callback("File not Exists or File not Valid");
+        return null;
     }
 }
 var decrypt = ( privatekey=null,iv=null, file, callback)=>{
@@ -53,7 +55,9 @@ var decrypt = ( privatekey=null,iv=null, file, callback)=>{
         });
 
     } else {
-        throw "File not Exists or File not Valid";
+        console.log("File not Exists or File not Valid");
+        callback("File not Exists or File not Valid");
+        return null;
     }
 }
 module.exports = {decrypt,encrypt};
