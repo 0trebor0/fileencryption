@@ -1,7 +1,7 @@
 {
-  "name": "fileencryption",
+  "name": "fileencryption0",
   "version": "1.0.0",
-  "description": "",
+  "description": "Just a Simple File Encription",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,7 +11,7 @@
     "url": "git+https://github.com/0trebor0/fileencryption.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "0trebor0",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/0trebor0/fileencryption/issues"
