@@ -50,6 +50,8 @@ var decrypt = ( privatekey=null,iv=null, file, callback)=>{
 
         writeStream.on('finish', ()=>{
             callback(newFilePath, privatekey.toString('base64'),iv.toString('base64'));
+            //writeStream.close();
+            //readStream.close();
         });
 
     } else {
