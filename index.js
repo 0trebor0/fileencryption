@@ -3,8 +3,7 @@ const crypto = require('crypto');
 
 var encrypt = (privatekey=null,file, callback)=>{
     if( fs.existsSync(file) && fs.statSync(file).isFile() ){
-        let iv;
-        iv = crypto.randomBytes(16);
+        let iv = crypto.randomBytes(16);
         iv = Buffer.from( iv );
 
         if( privatekey == null ){
@@ -31,7 +30,6 @@ var encrypt = (privatekey=null,file, callback)=>{
     } else {
         console.log("File not Exists or File not Valid");
         callback({error:'File not Exists or File not Valid'});
-        return null;
     }
 }
 var decrypt = ( privatekey=null,iv=null, file, callback)=>{
@@ -57,7 +55,6 @@ var decrypt = ( privatekey=null,iv=null, file, callback)=>{
     } else {
         console.log("File not Exists or File not Valid");
         callback({error:'File not Exists or File not Valid'});
-        return null;
     }
 }
 module.exports = {decrypt,encrypt};

@@ -1,5 +1,6 @@
 # fileencryption
 
+    const encryption = require('fileencryption0');
 
     encryption.encrypt(PRIVATEKEY,FILEPATH,CALLBACK);
     encryption.encrypt("YOURPRIVATEKEY",'FILEPATH',(file,privatekey,iv)=>{
