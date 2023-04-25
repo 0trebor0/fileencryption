@@ -1,64 +1,138 @@
 const fs = require('fs');
 const crypto = require('crypto');
+const serverKey = process.env.PRIVATEKEY;
 
-var encrypt = (privatekey=null,file, callback)=>{
-    if( fs.existsSync(file) && fs.statSync(file).isFile() ){
+var encrypt = ( object = {}, callback = null )=>{
+
+    if( fs.existsSync(object.input) && fs.statSync(object.input).isFile() ){
+
+        if( 'key' in object && object.key !== '' ){
+
+        } else {
+            object.key = serverKey;
+        }
+        if( !"output" in object || !object.output ){
+
+            object.error = 'output name must be set';
+            
+
+            if( typeof callback === 'function' ){
+             
+                callback( object.error );
+            
+            }
+
+        }
+        
+        object.key = crypto.scryptSync( object.key, 'salt', 32 );
+
+        object.key = Buffer.from( object.key );
+
         let iv = crypto.randomBytes(16);
+
         iv = Buffer.from( iv );
 
-        if( privatekey == null ){
-            privatekey = crypto.scryptSync( crypto.randomBytes(16), 'salt', 32 );
-        } else {
-            privatekey = crypto.scryptSync( privatekey, 'salt', 32 );
+        let cipher = crypto.createCipheriv('aes-256-cbc', object.key, iv);
+
+        let readStream = fs.createReadStream(object.input);
+
+        let writeStream = fs.createWriteStream(object.output);
+
+        readStream.pipe(cipher).pipe(writeStream);
+
+        writeStream.on('finish', ()=>{
+
+            object.ok = {file:object.output,key:object.key.toString('base64'),iv:iv.toString('base64')};
+
+            if( typeof callback === 'function' ){
+
+                callback( object.ok );
+
+            }
+            
+            writeStream.close();
+            
+            readStream.close();
+        
+        });
+
+    } else {
+
+        object.error = 'input was not found';
+        
+        if( typeof callback === 'function' ){
+
+            callback( object.error );
+
         }
-        privatekey = Buffer.from( privatekey );
-
-        let cipher = crypto.createCipheriv('aes-256-cbc', privatekey, iv);
-
-        let readStream = fs.createReadStream(file);
-
-        let newFilePath = file+'.encrypted';
-
-        let writeStream = fs.createWriteStream(newFilePath);
-
-        readStream.pipe(cipher).pipe(writeStream);
-
-        writeStream.on('finish', ()=>{
-            callback(newFilePath, privatekey.toString('base64'),iv.toString('base64'));
-            writeStream.close();
-            readStream.close();
-        });
-
-    } else {
-        console.log("File not Exists or File not Valid");
-        callback({error:'File not Exists or File not Valid'});
+    
     }
+
 }
-var decrypt = ( privatekey=null,iv=null, file, callback)=>{
-    if( fs.existsSync(file) && fs.statSync(file).isFile() ){
-        iv = Buffer.from(iv,'base64');
+var decrypt = ( object = {}, callback = null )=>{
+    
+    if( fs.existsSync( object.input) && fs.statSync( object.input).isFile() ){
+    
+        if( 'key' in object && object.key ){            
+        } else {
+            object.key = serverKey;
+        }
+        if( !"output" in object || !object.output ){
 
-        privatekey = Buffer.from(privatekey,'base64');
+            object.error = 'output name must be set';
 
-        let cipher = crypto.createDecipheriv('aes-256-cbc', privatekey, iv);
+            if( typeof callback === 'function' ){
 
-        let readStream = fs.createReadStream(file);
+                callback(object.error);
+            
+            }
 
-        let newFilePath = file+'.decrypted';
+        }
 
-        let writeStream = fs.createWriteStream(newFilePath);
+        object.key = crypto.scryptSync( object.key, 'salt', 32 );
 
-        readStream.pipe(cipher).pipe(writeStream);
+        object.key = Buffer.from(object.key,'base64');
+
+        object.iv = Buffer.from( object.iv, 'base64' );
+
+        let cipher = crypto.createDecipheriv('aes-256-cbc', object.key, object.iv );
+
+        let readStream = fs.createReadStream( object.input );
+
+        let writeStream = fs.createWriteStream( object.output );
+
+        readStream.pipe( cipher ).pipe( writeStream );
 
         writeStream.on('finish', ()=>{
-            callback(newFilePath, privatekey.toString('base64'),iv.toString('base64'));
+
+            object.ok = {file:object.output,key:object.key.toString('base64')};
+            
+
+            if( typeof callback === 'function' ){
+
+                callback( object.ok );
+
+            }
+
             writeStream.close();
+
             readStream.close();
+
         });
 
     } else {
-        console.log("File not Exists or File not Valid");
-        callback({error:'File not Exists or File not Valid'});
+
+        object.error = 'input was not found';
+
+        if( typeof callback === 'function' ){
+
+            callback(object.error);
+
+        }
+    
     }
+    
+    return object;
+
 }
 module.exports = {decrypt,encrypt};
